@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BetterSearch</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🔍 BetterSearch</h1>
+        <p>Advanced Search Made Easy</p>
+      </div>
+
+      <form class="form-container" id="searchForm">
+        <div class="form-group">
+          <label for="query">Search Query</label>
+          <input
+            type="text"
+            id="query"
+            placeholder="e.g. artificial intelligence"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>
+            File Type
+            <span class="label-hint">(optional)</span>
+          </label>
+          <select id="filetype">
+            <option value="">All File Types</option>
+            <option value="pdf">PDF Documents</option>
+            <option value="doc">Word Documents</option>
+            <option value="xls">Excel Spreadsheets</option>
+            <option value="ppt">PowerPoint Presentations</option>
+            <option value="txt">Text Files</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>
+            Website / Domain
+            <span class="label-hint">(optional)</span>
+          </label>
+          <input type="text" id="site" placeholder="e.g. wikipedia.org" />
+        </div>
+
+        <!-- Advanced Options -->
+        <div class="advanced-toggle" id="toggleOptions">
+          <span>Advanced Options</span>
+          <span class="arrow" id="arrow">▼</span>
+        </div>
+
+        <div class="advanced-options" id="advancedOptions">
+          <div class="form-group">
+            <label>
+              Exact Phrase
+              <span class="label-hint"
+                >(words must appear in this exact order)</span
+              >
+            </label>
+            <input
+              type="text"
+              id="exact"
+              placeholder='e.g. "machine learning basics"'
+            />
+          </div>
+
+          <div class="form-group">
+            <label>
+              Any of These Words
+              <span class="label-hint">(separate with commas)</span>
+            </label>
+            <input
+              type="text"
+              id="or"
+              placeholder="e.g. tutorial, guide, explanation"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>
+              Exclude These Words
+              <span class="label-hint">(separate with commas)</span>
+            </label>
+            <input type="text" id="exclude" placeholder="e.g. ads, buy" />
+          </div>
+
+          <div class="form-group">
+            <label>Time Range</label>
+            <select id="timerange">
+              <option value="">Any Time</option>
+              <option value="d">Past 24 Hours</option>
+              <option value="w">Past Week</option>
+              <option value="m">Past Month</option>
+              <option value="y">Past Year</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>In Title</label>
+            <input
+              type="text"
+              id="intitle"
+              placeholder="Word must appear in page title"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>In URL</label>
+            <input
+              type="text"
+              id="inurl"
+              placeholder="Word must appear in URL"
+            />
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Start Search</button>
+      </form>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Advanced Search – Chrome Extension</title>
+    <style>
+      :root {
+        --bg: #0b0b10;
+        --panel: #12131a;
+        --panel-2: #171925;
+        --text: #e9ecf1;
+        --muted: #a6adbb;
+        --border: #262a36;
+        --accent: #6d75ff;
+        --accent-2: #9aa1ff;
+        --radius: 14px;
+        --radius-sm: 10px;
+        --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+        --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial, sans-serif;
+      }
+
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #f6f7fb;
+          --panel: #ffffff;
+          --panel-2: #f7f8fc;
+          --text: #0f172a;
+          --muted: #495165;
+          --border: #e7e8ef;
+          --accent: #4f46e5;
+          --accent-2: #818cf8;
+          --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font);
+        line-height: 1.4;
+      }
+
+      .popup {
+        width: 400px;
+        max-width: 100vw;
+        min-height: 560px;
+        padding: 14px;
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        border-bottom: 1px solid var(--border);
+        background: linear-gradient(180deg, var(--panel-2), var(--panel));
+      }
+
+      .logo {
+        width: 32px;
+        height: 32px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--accent-2), var(--accent));
+        box-shadow: 0 2px 8px rgba(109, 117, 255, 0.3);
+        flex-shrink: 0;
+      }
+
+      .header-text {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .title {
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: 0.2px;
+        margin-bottom: 2px;
+      }
+
+      .subtitle {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .section {
+        padding: 16px;
+      }
+
+      .section + .section {
+        border-top: 1px solid var(--border);
+      }
+
+      .searchbar {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      .input,
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--border);
+        background: var(--panel-2);
+        color: var(--text);
+        border-radius: var(--radius-sm);
+        padding: 10px 12px;
+        font: inherit;
+        font-size: 14px;
+        outline: none;
+        transition: all 0.2s ease;
+      }
+
+      .input.big {
+        font-size: 15px;
+        padding: 12px 14px;
+        font-weight: 500;
+      }
+
+      .input::placeholder {
+        color: var(--muted);
+        opacity: 0.5;
+      }
+
+      .input:focus,
+      select:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(109, 117, 255, 0.15);
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        min-height: 28px;
+      }
+
+      .chip {
+        background: var(--panel-2);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.2s ease;
+      }
+
+      .chip:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .chip svg {
+        opacity: 0.6;
+        flex-shrink: 0;
+      }
+
+      .accordion {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      details.ac {
+        background: var(--panel-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        transition: all 0.2s ease;
+      }
+
+      details.ac[open] {
+        border-color: var(--accent);
+      }
+
+      summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        user-select: none;
+        font-weight: 600;
+        font-size: 13px;
+        transition: background 0.2s ease;
+      }
+
+      summary:hover {
+        background: var(--panel);
+      }
+
+      summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .summary-icon {
+        transition: transform 0.3s ease;
+      }
+
+      details[open] .summary-icon {
+        transform: rotate(180deg);
+      }
+
+      .ac-body {
+        padding: 14px;
+        border-top: 1px solid var(--border);
+        animation: slideDown 0.3s ease;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .field-group {
+        display: grid;
+        gap: 12px;
+      }
+
+      .field-group.two-col {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .hint {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 8px;
+        line-height: 1.4;
+      }
+
+      .select-wrap {
+        position: relative;
+      }
+
+      .select-wrap::after {
+        content: "";
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 5px solid var(--muted);
+        pointer-events: none;
+      }
+
+      select {
+        appearance: none;
+        cursor: pointer;
+        padding-right: 32px;
+      }
+
+      .toggle-field {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 0;
+      }
+
+      .switch-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+      }
+
+      .switch {
+        position: relative;
+        width: 44px;
+        height: 24px;
+        border-radius: 999px;
+        background: var(--border);
+        border: 1px solid var(--border);
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+      }
+
+      .switch::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        background: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      input[type="checkbox"] {
+        display: none;
+      }
+
+      input[type="checkbox"]:checked + .switch {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+
+      input[type="checkbox"]:checked + .switch::after {
+        left: 22px;
+      }
+
+      .switch-wrapper label {
+        margin: 0;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+      }
+
+      .footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 14px 16px;
+        border-top: 1px solid var(--border);
+        background: var(--panel);
+      }
+
+      .btn {
+        border: 1px solid var(--border);
+        background: var(--panel-2);
+        color: var(--text);
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: inherit;
+      }
+
+      .btn:hover {
+        background: var(--panel);
+        transform: translateY(-1px);
+      }
+
+      .btn.ghost {
+        background: transparent;
+        border-color: transparent;
+      }
+
+      .btn.ghost:hover {
+        background: var(--panel-2);
+        border-color: var(--border);
+      }
+
+      .btn.primary {
+        background: linear-gradient(135deg, var(--accent-2), var(--accent));
+        border-color: var(--accent);
+        color: white;
+        box-shadow: 0 2px 8px rgba(109, 117, 255, 0.3);
+      }
+
+      .btn.primary:hover {
+        box-shadow: 0 4px 12px rgba(109, 117, 255, 0.4);
+        transform: translateY(-2px);
+      }
+
+      .btn.primary:active {
+        transform: translateY(0);
+      }
+
+      .footer-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .divider {
+        width: 1px;
+        height: 20px;
+        background: var(--border);
+      }
+
+      .empty-state {
+        padding: 8px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 11px;
+        font-style: italic;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        .switch::after {
+          background: #e5e7eb;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="popup">
+      <form class="card" id="searchForm">
+        <!-- Header -->
+        <div class="header">
+          <div class="logo">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="M20 20L16.65 16.65" />
+            </svg>
+          </div>
+          <div class="header-text">
+            <div class="title">Advanced Search</div>
+            <div class="subtitle">Google-Operatoren ohne Lernkurve</div>
+          </div>
+        </div>
+
+        <!-- Main Search -->
+        <div class="section searchbar">
+          <div>
+            <label for="q">Suchbegriff</label>
+            <input
+              id="q"
+              class="input big"
+              type="text"
+              name="q"
+              placeholder="z.B. datenschutz vertrag muster"
+              autocomplete="off"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="section">
+          <div class="accordion">
+            <!-- Quick Filters -->
+            <details class="ac" open>
+              <summary>
+                <span>Häufig genutzt</span>
+                <svg
+                  class="summary-icon"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </summary>
+              <div class="ac-body">
+                <div class="field-group two-col">
+                  <div class="field">
+                    <label for="site">Website / Domain</label>
+                    <input
+                      id="site"
+                      class="input"
+                      type="text"
+                      name="site"
+                      placeholder="z.B. wikipedia.org"
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="filetype">Dateityp</label>
+                    <div class="select-wrap">
+                      <select id="filetype" name="filetype">
+                        <option value="">Alle Typen</option>
+                        <option value="pdf">PDF</option>
+                        <option value="docx">Word (DOCX)</option>
+                        <option value="pptx">PowerPoint</option>
+                        <option value="xlsx">Excel</option>
+                        <option value="txt">Text</option>
+                        <option value="csv">CSV</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="field-group two-col" style="margin-top: 12px">
+                  <div class="field">
+                    <label for="exact">Exakte Phrase</label>
+                    <input
+                      id="exact"
+                      class="input"
+                      type="text"
+                      name="exact"
+                      placeholder="z.B. privacy by design"
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="exclude">Wörter ausschließen</label>
+                    <input
+                      id="exclude"
+                      class="input"
+                      type="text"
+                      name="exclude"
+                      placeholder="z.B. werbung, kaufen"
+                    />
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <!-- Precision Filters -->
+            <details class="ac">
+              <summary>
+                <span>Präzisierung</span>
+                <svg
+                  class="summary-icon"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </summary>
+              <div class="ac-body">
+                <div class="field-group two-col">
+                  <div class="field">
+                    <label for="intitle">Im Titel</label>
+                    <input
+                      id="intitle"
+                      class="input"
+                      type="text"
+                      name="intitle"
+                      placeholder="z.B. Leitfaden"
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="inurl">In der URL</label>
+                    <input
+                      id="inurl"
+                      class="input"
+                      type="text"
+                      name="inurl"
+                      placeholder="z.B. handbuch"
+                    />
+                  </div>
+                </div>
+                <div class="field-group" style="margin-top: 12px">
+                  <div class="field">
+                    <label for="or">Eines dieser Wörter (OR)</label>
+                    <input
+                      id="or"
+                      class="input"
+                      type="text"
+                      name="or"
+                      placeholder="z.B. vorlage, muster, beispiel"
+                    />
+                  </div>
+                </div>
+                <div class="field-group two-col" style="margin-top: 12px">
+                  <div class="field">
+                    <label for="daterange">Zeitraum</label>
+                    <div class="select-wrap">
+                      <select id="daterange" name="daterange">
+                        <option value="">Beliebig</option>
+                        <option value="d">Letzte 24h</option>
+                        <option value="w">Letzte Woche</option>
+                        <option value="m">Letzter Monat</option>
+                        <option value="y">Letztes Jahr</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="lang">Sprache</label>
+                    <div class="select-wrap">
+                      <select id="lang" name="lang">
+                        <option value="">Alle</option>
+                        <option value="lang_de">Deutsch</option>
+                        <option value="lang_en">Englisch</option>
+                        <option value="lang_fr">Französisch</option>
+                        <option value="lang_es">Spanisch</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <p class="hint">
+                  OR-Verknüpfungen werden automatisch korrekt gruppiert
+                </p>
+              </div>
+            </details>
+
+            <!-- Quality & Safety -->
+            <details class="ac">
+              <summary>
+                <span>Weitere Optionen</span>
+                <svg
+                  class="summary-icon"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </summary>
+              <div class="ac-body">
+                <div class="toggle-field">
+                  <label class="switch-wrapper">
+                    <input id="safe" type="checkbox" name="safesearch" />
+                    <span class="switch"></span>
+                    <span>SafeSearch aktivieren</span>
+                  </label>
+                </div>
+                <div class="field-group two-col" style="margin-top: 12px">
+                  <div class="field">
+                    <label for="location">Region</label>
+                    <div class="select-wrap">
+                      <select id="location" name="location">
+                        <option value="">Global</option>
+                        <option value="countryDE">Deutschland</option>
+                        <option value="countryAT">Österreich</option>
+                        <option value="countryCH">Schweiz</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="num">Ergebnisse/Seite</label>
+                    <div class="select-wrap">
+                      <select id="num" name="num">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+          <button type="button" class="btn ghost" id="resetBtn">
+            Zurücksetzen
+          </button>
+          <div class="footer-actions">
+            <button class="btn primary" type="submit">Suchen</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
