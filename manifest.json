@@ -1,9 +1,10 @@
 {
-  "name": "BetterSearch",
-  "description": "Chrome Extension for advanced searching",
-  "version": "1.0",
+  "name": "BetterSearch - Advanced Google Search",
+  "description": "Builds Google search URLs with filetype and site - no operator knowledge needed.",
+  "version": "0.1.0",
   "manifest_version": 3,
   "action": {
+    "default_title": "BetterSearch",
     "default_popup": "/popup/popup.html",
     "default_icon": "icon.png"
   },
