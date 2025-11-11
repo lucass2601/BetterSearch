@@ -1,67 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>BetterSearch</title>
-    <link rel="stylesheet" href="popup.css" />
+    <style>
+      :root {
+        --bg: #0b0f14;
+        --fg: #e6edf3;
+        --muted: #9fb1c1;
+        --card: #121821;
+        --ring: #7047eb;
+        --border: #223043;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        width: 500px;
+        height: 600px;
+        background: linear-gradient(135deg, #f9fafb 0%, #e2cbfb 100%);
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+    </style>
   </head>
   <body>
-    <div class="container">
-      <header class="header">
-        <h1 id="title">🔍 BetterSearch</h1>
-        <p id="subtitle">Advanced search — no operator knowledge needed</p>
-      </header>
+    <header>BetterSearch</header>
 
-      <form id="searchForm" class="form" autocomplete="off">
-        <label class="field">
-          <span class="label">Search query</span>
-          <input
-            id="query"
-            name="query"
-            type="text"
-            placeholder="e.g. artificial intelligence"
-          />
-        </label>
+    <main></main>
 
-        <label class="field">
-          <span class="label">File type</span>
-          <select id="filetype" name="filetype">
-            <option value="">All file types</option>
-            <option value="pdf">PDF (.pdf)</option>
-            <option value="doc OR docx">Word (.doc/.docx)</option>
-            <option value="xls OR xlsx">Excel (.xls/.xlsx)</option>
-            <option value="ppt OR pptx">PowerPoint (.ppt/.pptx)</option>
-            <option value="txt">Text (.txt)</option>
-            <option value="csv">CSV (.csv)</option>
-            <option value="json">JSON (.json)</option>
-            <option value="svg">SVG (.svg)</option>
-            <option value="jpg OR jpeg OR png">Bild (JPG/PNG)</option>
-            <option value="gif">GIF (.gif)</option>
-            <option value="mp3 OR wav">Audio (MP3/WAV)</option>
-            <option value="mp4 OR mov">Video (MP4/MOV)</option>
-          </select>
-        </label>
-
-        <label class="field">
-          <span class="label">Limit to domain</span>
-          <input
-            id="site"
-            name="site"
-            type="text"
-            placeholder="e.g. wikipedia.com or .edu"
-          />
-        </label>
-
-        <button id="submitBtn" class="btn" type="submit">
-          Search on Google
-        </button>
-      </form>
-
-      <footer class="footer">
-        <button id="resetBtn" class="link" type="button">Reset</button>
-      </footer>
-    </div>
+    <footer>
+      Made with ❤️ by
+      <a href="https://github.com/lucass2601" target="_blank">@lucass2601</a> •
+      <span id="version"></span>
+    </footer>
 
     <script src="popup.js"></script>
   </body>
