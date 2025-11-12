@@ -2,40 +2,599 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BetterSearch</title>
     <style>
+      @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap");
+
       :root {
-        --bg: #0b0f14;
-        --fg: #e6edf3;
-        --muted: #9fb1c1;
-        --card: #121821;
-        --ring: #7047eb;
-        --border: #223043;
+        --primary: rgb(134, 71, 235);
+        --primary-hover: rgb(114, 51, 215);
+        --bg-gradient: linear-gradient(135deg, #f9fafb 0%, #e2cbfb 100%);
+        --shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+        --shadow-lg: rgba(99, 99, 99, 0.3) 0px 4px 16px 0px;
       }
 
       * {
         box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
 
       body {
-        margin: 0;
-        padding: 0;
+        padding: 20px;
         width: 500px;
         height: 600px;
-        background: linear-gradient(135deg, #f9fafb 0%, #e2cbfb 100%);
-        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        background: var(--bg-gradient);
+        font-family: "Manrope", sans-serif;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-direction: column;
+        gap: 16px;
+        overflow: hidden;
+      }
+
+      header {
+        text-align: center;
+        flex-shrink: 0;
+      }
+
+      .headline {
+        font-size: 28px;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--primary) 0%, #9333ea 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 6px;
+      }
+
+      .subheadline {
+        color: #6b7280;
+        font-size: 13px;
+        font-weight: 400;
+      }
+
+      main {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        flex: 1;
+        min-height: 0;
+      }
+
+      .search-container {
+        position: relative;
+        flex-shrink: 0;
+      }
+
+      .search {
+        padding: 16px;
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        transition: box-shadow 0.2s;
+      }
+
+      .search:hover {
+        box-shadow: var(--shadow-lg);
+      }
+
+      .search-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .search-label {
+        font-weight: 500;
+        font-size: 14px;
+        color: #374151;
+      }
+
+      .add-filter-btn {
+        width: 36px;
+        height: 36px;
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 20px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        flex-shrink: 0;
+      }
+
+      .add-filter-btn:hover {
+        background-color: var(--primary-hover);
+        transform: scale(1.05);
+      }
+
+      .add-filter-btn:active {
+        transform: scale(0.95);
+      }
+
+      .input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 15px;
+        font-family: inherit;
+        transition: border-color 0.2s;
+      }
+
+      .input:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+
+      .button {
+        width: 100%;
+        padding: 12px 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+      }
+
+      .button:active {
+        transform: scale(0.98);
+      }
+
+      .button.primary {
+        background-color: var(--primary);
+        color: white;
+      }
+
+      .button.primary:hover {
+        background-color: var(--primary-hover);
+      }
+
+      .button.secondary {
+        background-color: white;
+        color: var(--primary);
+        border: 2px solid var(--primary);
+      }
+
+      .button.secondary:hover {
+        background-color: #faf5ff;
+      }
+
+      /* Dropdown Styles */
+      .dropdown-menu {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        right: 0;
+        background-color: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        max-height: 0;
+        overflow: hidden;
+        z-index: 100;
+        transition: all 0.3s ease;
+        opacity: 0;
+        box-shadow: none;
+      }
+
+      .dropdown-menu.show {
+        max-height: 340px;
+        overflow-y: auto;
+        opacity: 1;
+        box-shadow: var(--shadow-lg);
+      }
+
+      .dropdown-category {
+        padding: 10px 16px;
+        background-color: #f9fafb;
+        font-size: 11px;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+
+      .dropdown-item {
+        padding: 12px 16px;
+        cursor: pointer;
+        transition: background-color 0.15s;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .dropdown-item:hover {
+        background-color: #faf5ff;
+      }
+
+      .dropdown-item-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #374151;
+      }
+
+      .dropdown-item-code {
+        font-size: 12px;
+        color: var(--primary);
+        font-family: "Consolas", monospace;
+      }
+
+      /* Filters Section */
+      .filters-section {
+        background-color: white;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        flex-shrink: 0;
+      }
+
+      .filters-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .filters-title {
+        font-weight: 500;
+        font-size: 14px;
+        color: #374151;
+      }
+
+      .filter-count {
+        background-color: var(--primary);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .filters-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        min-height: 28px;
+      }
+
+      .filter-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 10px;
+        background-color: #f3f4f6;
+        border-radius: 6px;
+        font-size: 13px;
+        color: #374151;
+      }
+
+      .filter-type {
+        font-weight: 600;
+        color: var(--primary);
+      }
+
+      .remove-filter {
+        background: none;
+        border: none;
+        color: #9ca3af;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        transition: color 0.2s;
+      }
+
+      .remove-filter:hover {
+        color: #ef4444;
+      }
+
+      /* Filter Block Styles */
+      .filter-block {
+        background-color: white;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        animation: slideDown 0.2s ease;
+        flex-shrink: 0;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .filter-block-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .filter-block-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+      }
+
+      .cancel-filter {
+        background: none;
+        border: none;
+        color: #9ca3af;
+        cursor: pointer;
+        font-size: 20px;
+        padding: 0;
+        transition: color 0.2s;
+      }
+
+      .cancel-filter:hover {
+        color: #ef4444;
+      }
+
+      .filter-inputs-wrapper {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+      }
+
+      .filter-inputs {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .input-small {
+        width: 100%;
+        padding: 8px 12px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: inherit;
+      }
+
+      .input-small:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+
+      .add-btn {
+        padding: 10px 16px;
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .add-btn:hover {
+        background-color: var(--primary-hover);
+      }
+
+      .help-text {
+        font-size: 12px;
+        color: #6b7280;
+      }
+
+      /* Query Preview */
+      .query-preview {
+        background-color: white;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+
+      .query-preview-title {
+        font-weight: 500;
+        font-size: 14px;
+        color: #374151;
+        margin-bottom: 10px;
+        flex-shrink: 0;
+      }
+
+      .query-display {
+        background-color: #f9fafb;
+        padding: 14px;
+        border-radius: 8px;
+        border: 2px solid #e5e7eb;
+        margin-bottom: 12px;
+        font-family: "Consolas", "Monaco", monospace;
+        font-size: 13px;
+        color: #1f2937;
+        word-break: break-word;
+        line-height: 1.6;
+        flex: 1;
+        overflow-y: auto;
+        min-height: 60px;
+      }
+
+      .query-display .operator {
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .query-display .value {
+        color: #059669;
+      }
+
+      .query-display.empty {
+        color: #9ca3af;
+        font-style: italic;
+        font-family: inherit;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .query-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+
+      footer {
+        text-align: center;
+        font-size: 12px;
+        color: #6b7280;
+        flex-shrink: 0;
+      }
+
+      footer a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      footer a:hover {
+        text-decoration: underline;
+      }
+
+      .hidden {
+        display: none;
       }
     </style>
   </head>
   <body>
-    <header>BetterSearch</header>
+    <header>
+      <h1 class="headline">BetterSearch</h1>
+      <p class="subheadline">
+        Be a Google search pro without needing operator knowledge
+      </p>
+    </header>
 
-    <main></main>
+    <main>
+      <div class="search-container">
+        <div class="search">
+          <div class="search-header">
+            <p class="search-label">What are you searching for?</p>
+            <button
+              class="add-filter-btn"
+              id="add-filter-btn"
+              title="Add filter"
+            >
+              +
+            </button>
+          </div>
+          <input
+            type="text"
+            id="search-input"
+            class="input"
+            placeholder="e.g., machine learning tutorials"
+          />
+        </div>
+
+        <!-- Dropdown -->
+        <div class="dropdown-menu" id="dropdown-menu">
+          <div class="dropdown-category">Basic Filters</div>
+          <div class="dropdown-item" data-filter="site">
+            <span class="dropdown-item-label">Search within site</span>
+            <span class="dropdown-item-code">site:</span>
+          </div>
+          <div class="dropdown-item" data-filter="filetype">
+            <span class="dropdown-item-label">File type</span>
+            <span class="dropdown-item-code">filetype:</span>
+          </div>
+          <div class="dropdown-item" data-filter="exclude">
+            <span class="dropdown-item-label">Exclude terms</span>
+            <span class="dropdown-item-code">-</span>
+          </div>
+          <div class="dropdown-item" data-filter="exact">
+            <span class="dropdown-item-label">Exact match</span>
+            <span class="dropdown-item-code">""</span>
+          </div>
+
+          <div class="dropdown-category">Advanced Filters</div>
+          <div class="dropdown-item" data-filter="or">
+            <span class="dropdown-item-label">OR terms</span>
+            <span class="dropdown-item-code">OR</span>
+          </div>
+          <div class="dropdown-item" data-filter="and">
+            <span class="dropdown-item-label">AND terms</span>
+            <span class="dropdown-item-code">AND</span>
+          </div>
+
+          <div class="dropdown-category">Content-Specific</div>
+          <div class="dropdown-item" data-filter="intitle">
+            <span class="dropdown-item-label">In title</span>
+            <span class="dropdown-item-code">intitle:</span>
+          </div>
+          <div class="dropdown-item" data-filter="inurl">
+            <span class="dropdown-item-label">In URL</span>
+            <span class="dropdown-item-code">inurl:</span>
+          </div>
+          <div class="dropdown-item" data-filter="intext">
+            <span class="dropdown-item-label">In text</span>
+            <span class="dropdown-item-code">intext:</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="filters-section">
+        <div class="filters-header">
+          <p class="filters-title">Active Filters</p>
+          <span class="filter-count" id="filter-count">0</span>
+        </div>
+        <div class="filters-list" id="filters-list"></div>
+      </div>
+
+      <!-- Filter Block (shows when adding filter) -->
+      <div class="filter-block hidden" id="filter-block">
+        <div class="filter-block-header">
+          <span class="filter-block-title" id="filter-block-title"
+            >Add Filter</span
+          >
+          <button class="cancel-filter" id="cancel-filter">×</button>
+        </div>
+        <div class="filter-inputs" id="filter-inputs"></div>
+      </div>
+
+      <!-- Query Preview (hidden when filter block is shown) -->
+      <div class="query-preview" id="query-preview">
+        <p class="query-preview-title">Your Search Query</p>
+        <div class="query-display empty" id="query-display">
+          Your search will appear here...
+        </div>
+        <div class="query-actions">
+          <button class="button secondary" id="copy-button">Copy</button>
+          <button class="button primary" id="search-button">
+            Search Google
+          </button>
+        </div>
+      </div>
+    </main>
 
     <footer>
       Made with ❤️ by
       <a href="https://github.com/lucass2601" target="_blank">@lucass2601</a> •
-      <span id="version"></span>
+      <!-- FIXME: Add version number dynamically -->
+      <span id="version">v0.1.0</span>
     </footer>
 
     <script src="popup.js"></script>
