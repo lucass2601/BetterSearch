@@ -1,7 +1,7 @@
 {
-  "name": "BetterSearch - Advanced Google Search",
-  "description": "Builds Google search URLs with filetype and site - no operator knowledge needed.",
-  "version": "0.1.0",
+  "name": "BetterSearch",
+  "description": "Be a Google search pro without needing operator knowledge",
+  "version": "0.2.0",
   "manifest_version": 3,
   "action": {
     "default_title": "BetterSearch",
